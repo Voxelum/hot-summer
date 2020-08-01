@@ -1,7 +1,6 @@
 package voxelum.summer;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockNamedItem;
@@ -10,6 +9,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.RegistryObject;
@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import voxelum.summer.blocks.CompressionMachineBlock;
 import voxelum.summer.blocks.TeaCropsBlock;
 import voxelum.summer.bodystatus.BodyStatus;
+import voxelum.summer.bodystatus.BodyStatusCapability;
 
 import java.util.stream.Collectors;
 
@@ -64,7 +65,6 @@ public class HotSummerMod {
     @CapabilityInject(BodyStatus.class)
     public static Capability<BodyStatus> CAPABILITY_BODY_STATUS = null;
 
-
     public HotSummerMod() {
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -80,9 +80,7 @@ public class HotSummerMod {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        // some preinit code
-        LOGGER.info("HELLO FROM PREINIT");
-        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        CapabilityManager.INSTANCE.register(BodyStatus.class, BodyStatusCapability.STORAGE, BodyStatus::new);
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {

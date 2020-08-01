@@ -7,7 +7,6 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -25,21 +24,13 @@ import static voxelum.summer.HotSummerMod.MODID;
 /**
  * The class to contain the capability registry and serialization code.
  */
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber
 public class BodyStatusCapability {
     /**
      * The capability location
      */
     public static final ResourceLocation CAPAIBLITY_BODY_STATUS_LOCATION = new ResourceLocation(MODID, "body_status");
     public static final Storage STORAGE = new Storage();
-
-    // static block to register the capability
-    static {
-        CapabilityManager.INSTANCE.register(BodyStatus.class, STORAGE, BodyStatus::new);
-    }
-
-    // don't initialize this class
-    private BodyStatusCapability() {}
 
     // register the capability to PlayerEntity
     @SubscribeEvent
