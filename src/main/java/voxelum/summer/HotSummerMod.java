@@ -16,6 +16,7 @@ import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
+import net.minecraft.item.PotionItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -60,6 +61,8 @@ public class HotSummerMod {
                     .sound(SoundType.CROP)));
     public static final RegistryObject<Item> TEA_ITEM = ITEMS_REGISTRY.register("tea",
             () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
+    public static final RegistryObject<Item> CUP_TEA_ITEM = ITEMS_REGISTRY.register("cuptea",
+            () -> new PotionItem(new Item.Properties().group(ItemGroup.BREWING)));
 
     public static final RegistryObject<Feature<NoFeatureConfig>> TEA_FEATURE = FEATURE_REGISTRY.register("tea_crop", TeaFeature::new);
 
