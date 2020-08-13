@@ -161,7 +161,7 @@ public class HotSummerMod {
         LOGGER.info("HELLO from server starting");
     }
 
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD,value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class RenderTypeRegistry {
         @SubscribeEvent
         public static void onRenderTypeSetup(FMLClientSetupEvent event) {
