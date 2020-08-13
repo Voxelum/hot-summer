@@ -1,0 +1,6 @@
+{
+  "parent": "block/crop",
+  "textures": {
+    "crop": "hotsummer:block/tea_corp_stage3"
+  }
+}

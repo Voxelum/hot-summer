@@ -3,11 +3,14 @@ package voxelum.summer;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.BlockNamedItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -48,16 +51,7 @@ public class HotSummerMod {
                     .hardnessAndResistance(0.0F)
                     .sound(SoundType.CROP)));
     public static final RegistryObject<Item> TEA_ITEM = ITEMS_REGISTRY.register("tea",
-            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-
-    public static final RegistryObject<Item> COOKED_TEA_ITEM = ITEMS_REGISTRY.register("cooked_tea",
-            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-
-    public static final RegistryObject<Item> CUP_OF_TEA_ITEM = ITEMS_REGISTRY.register("cup_tea",
-            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-
-    public static final RegistryObject<Item> TEA_SEEDS_ITEM = ITEMS_REGISTRY.register("tea_seeds",
-            () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.MATERIALS)));
+            () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
 
     @CapabilityInject(BodyStatus.class)
     public static Capability<BodyStatus> CAPABILITY_BODY_STATUS = null;
@@ -72,6 +66,9 @@ public class HotSummerMod {
     public static Capability<ChunkHeatSources> CAPABILITY_CHUNK_HEAT_SOURCES = null;
 
     public HotSummerMod() {
+        ITEMS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
+        BLOCKS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
+
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -162,5 +159,13 @@ public class HotSummerMod {
     public void onServerStarting(FMLServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("HELLO from server starting");
+    }
+
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD,value = Dist.CLIENT)
+    public static class RenderTypeRegistry {
+        @SubscribeEvent
+        public static void onRenderTypeSetup(FMLClientSetupEvent event) {
+            RenderTypeLookup.setRenderLayer(TEA_CORP_BLOCK.get(), RenderType.getCutout());
+        }
     }
 }
