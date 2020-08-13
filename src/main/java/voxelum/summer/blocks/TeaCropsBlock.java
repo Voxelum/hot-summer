@@ -14,9 +14,6 @@ import voxelum.summer.HotSummerMod;
 public class TeaCropsBlock extends CropsBlock {
     public TeaCropsBlock(Properties builder) {
         super(builder);
-        System.out.println(this.getMaterial(this.getDefaultState()) == Material.PLANTS);
-        System.out.println(this.getMaterial(this.getDefaultState()).isOpaque());
-        System.out.println(this.getMaterial(this.getDefaultState()).isSolid());
     }
 
     private static final VoxelShape[] SHAPES = new VoxelShape[]{

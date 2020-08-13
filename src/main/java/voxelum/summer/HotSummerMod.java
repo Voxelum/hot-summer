@@ -10,6 +10,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
+import net.minecraft.world.biome.Biomes;
+import net.minecraft.world.biome.DefaultBiomeFeatures;
+import net.minecraft.world.gen.GenerationStage;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.IFeatureConfig;
+import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -31,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import voxelum.summer.blocks.TeaCropsBlock;
 import voxelum.summer.core.*;
+import voxelum.summer.gen.feature.TeaFeature;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
@@ -44,6 +51,7 @@ public class HotSummerMod {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final DeferredRegister<Item> ITEMS_REGISTRY = new DeferredRegister<>(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS_REGISTRY = new DeferredRegister<>(ForgeRegistries.BLOCKS, MODID);
+    public static final DeferredRegister<Feature<?>> FEATURE_REGISTRY = new DeferredRegister<>(ForgeRegistries.FEATURES, MODID);
     public static final RegistryObject<Block> TEA_CORP_BLOCK = BLOCKS_REGISTRY.register("tea_corp",
             () -> new TeaCropsBlock(Block.Properties.create(Material.PLANTS)
                     .doesNotBlockMovement()
@@ -52,6 +60,8 @@ public class HotSummerMod {
                     .sound(SoundType.CROP)));
     public static final RegistryObject<Item> TEA_ITEM = ITEMS_REGISTRY.register("tea",
             () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
+
+    public static final RegistryObject<Feature<NoFeatureConfig>> TEA_FEATURE = FEATURE_REGISTRY.register("tea_crop", TeaFeature::new);
 
     @CapabilityInject(BodyStatus.class)
     public static Capability<BodyStatus> CAPABILITY_BODY_STATUS = null;
@@ -68,6 +78,7 @@ public class HotSummerMod {
     public HotSummerMod() {
         ITEMS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
         BLOCKS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
+        FEATURE_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -132,6 +143,8 @@ public class HotSummerMod {
 
             }
         }, ChunkHeatSources::new);
+
+        Biomes.MOUNTAINS.addFeature(GenerationStage.Decoration.VEGETAL_DECORATION, TEA_FEATURE.get().withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG));
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
