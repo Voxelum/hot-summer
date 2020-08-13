@@ -1,4 +1,4 @@
-package voxelum.summer.bodystatus;
+package voxelum.summer.core;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -69,10 +69,17 @@ public class BodyStatusCapability {
     static class Provider implements ICapabilitySerializable<CompoundNBT> {
         private BodyStatus status = new BodyStatus();
 
+        {
+            status.temperature = 36.5F;
+        }
+
         @Nonnull
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-            return cap == HotSummerMod.CAPABILITY_BODY_STATUS ? LazyOptional.of(() -> (T) status) : LazyOptional.empty();
+            return cap == HotSummerMod.CAPABILITY_BODY_STATUS
+                    || cap == HotSummerMod.CAPABILITY_HEAT_SOURCE
+                    ? LazyOptional.of(() -> (T) status)
+                    : LazyOptional.empty();
         }
 
         // use storage to serialize; don't repeat your self

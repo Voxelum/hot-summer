@@ -1,4 +1,4 @@
-package voxelum.summer.bodystatus;
+package voxelum.summer.core;
 
 /**
  * The capability attach to {@link net.minecraft.entity.LivingEntity}
@@ -6,7 +6,6 @@ package voxelum.summer.bodystatus;
  *
  * @see BodyStatusCapability
  */
-public class BodyStatus {
-    public float temperature;
+public class BodyStatus extends HeatSource {
     public float hydration;
 }

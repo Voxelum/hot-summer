@@ -6,6 +6,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockNamedItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -24,11 +26,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import voxelum.summer.blocks.CompressionMachineBlock;
 import voxelum.summer.blocks.TeaCropsBlock;
-import voxelum.summer.bodystatus.BodyStatus;
-import voxelum.summer.bodystatus.BodyStatusCapability;
+import voxelum.summer.core.*;
 
+import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -46,24 +47,29 @@ public class HotSummerMod {
                     .tickRandomly()
                     .hardnessAndResistance(0.0F)
                     .sound(SoundType.CROP)));
-    public static final RegistryObject<Block> COMPRESSION_MACHINE_BLOCK = BLOCKS_REGISTRY.register("compression_machine",
-            () -> new CompressionMachineBlock(Block.Properties.create(Material.ROCK)
-                    .hardnessAndResistance(3.5F)
-                    .lightValue(13)));
     public static final RegistryObject<Item> TEA_ITEM = ITEMS_REGISTRY.register("tea",
             () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-    public static final RegistryObject<Item> COOL_TEA_ITEM = ITEMS_REGISTRY.register("cool_tea_drink",
+
+    public static final RegistryObject<Item> COOKED_TEA_ITEM = ITEMS_REGISTRY.register("cooked_tea",
             () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-    public static final RegistryObject<Item> HOT_TEA_ITEM = ITEMS_REGISTRY.register("hot_tea_drink",
+
+    public static final RegistryObject<Item> CUP_OF_TEA_ITEM = ITEMS_REGISTRY.register("cup_tea",
             () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-    public static final RegistryObject<Item> COOL_COKE_ITEM = ITEMS_REGISTRY.register("cool_coke_drink",
-            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.COKE)));
-    public static final RegistryObject<Item> HOT_COKE_ITEM = ITEMS_REGISTRY.register("hot_coke_drink",
-            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.COKE)));
+
     public static final RegistryObject<Item> TEA_SEEDS_ITEM = ITEMS_REGISTRY.register("tea_seeds",
             () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.MATERIALS)));
+
     @CapabilityInject(BodyStatus.class)
     public static Capability<BodyStatus> CAPABILITY_BODY_STATUS = null;
+
+    @CapabilityInject(WarmKeeper.class)
+    public static Capability<WarmKeeper> CAPABILITY_WARN_KEEPER = null;
+
+    @CapabilityInject(HeatSource.class)
+    public static Capability<HeatSource> CAPABILITY_HEAT_SOURCE = null;
+
+    @CapabilityInject(ChunkHeatSources.class)
+    public static Capability<ChunkHeatSources> CAPABILITY_CHUNK_HEAT_SOURCES = null;
 
     public HotSummerMod() {
         // Register the setup method for modloading
@@ -81,6 +87,54 @@ public class HotSummerMod {
 
     private void setup(final FMLCommonSetupEvent event) {
         CapabilityManager.INSTANCE.register(BodyStatus.class, BodyStatusCapability.STORAGE, BodyStatus::new);
+        CapabilityManager.INSTANCE.register(Drinkable.class, new Capability.IStorage<Drinkable>() {
+            @Nullable
+            @Override
+            public INBT writeNBT(Capability<Drinkable> capability, Drinkable instance, Direction side) {
+                return null;
+            }
+
+            @Override
+            public void readNBT(Capability<Drinkable> capability, Drinkable instance, Direction side, INBT nbt) {
+
+            }
+        }, Drinkable::new);
+        CapabilityManager.INSTANCE.register(HeatSource.class, new Capability.IStorage<HeatSource>() {
+            @Nullable
+            @Override
+            public INBT writeNBT(Capability<HeatSource> capability, HeatSource instance, Direction side) {
+                return null;
+            }
+
+            @Override
+            public void readNBT(Capability<HeatSource> capability, HeatSource instance, Direction side, INBT nbt) {
+
+            }
+        }, HeatSource::new);
+        CapabilityManager.INSTANCE.register(WarmKeeper.class, new Capability.IStorage<WarmKeeper>() {
+            @Nullable
+            @Override
+            public INBT writeNBT(Capability<WarmKeeper> capability, WarmKeeper instance, Direction side) {
+                return null;
+            }
+
+            @Override
+            public void readNBT(Capability<WarmKeeper> capability, WarmKeeper instance, Direction side, INBT nbt) {
+
+            }
+        }, WarmKeeper::new);
+        CapabilityManager.INSTANCE.register(ChunkHeatSources.class, new Capability.IStorage<ChunkHeatSources>() {
+            @Nullable
+            @Override
+            public INBT writeNBT(Capability<ChunkHeatSources> capability, ChunkHeatSources instance, Direction side) {
+                return null;
+            }
+
+            @Override
+            public void readNBT(Capability<ChunkHeatSources> capability, ChunkHeatSources instance, Direction side, INBT nbt) {
+
+            }
+        }, ChunkHeatSources::new);
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
