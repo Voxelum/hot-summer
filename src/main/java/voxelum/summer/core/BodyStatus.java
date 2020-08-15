@@ -7,5 +7,5 @@ package voxelum.summer.core;
  * @see BodyStatusCapability
  */
 public class BodyStatus extends HeatSource {
-    public float hydration;
+    public float hydration = 1;
 }

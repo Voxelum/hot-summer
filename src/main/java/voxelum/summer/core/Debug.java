@@ -33,7 +33,7 @@ public class Debug {
 
     @SubscribeEvent
     public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END && counter != 1) {
+        if (event.phase != TickEvent.Phase.END || counter != 1) {
             return;
         }
         PlayerEntity player = event.player;

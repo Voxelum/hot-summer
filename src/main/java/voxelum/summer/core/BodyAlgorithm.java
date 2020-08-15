@@ -102,7 +102,7 @@ public class BodyAlgorithm {
                     if (temperature != Float.MIN_VALUE) {
                         // Manhattan Distance
                         int dis = Math.abs(x) + Math.abs(y) + Math.abs(z);
-                        float factor = 1F / dis * 0.01F;
+                        float factor = dis == 0 ? 1F : 1F / dis * 0.01F;
                         total += factor * (temperature - sourceTemperature + DISMISS_DIFF_FACTOR);
                     }
                 }
@@ -163,9 +163,18 @@ public class BodyAlgorithm {
         float passiveShift = getPassiveTemperatureShift(playerEntity, status.temperature);
         // the heat dropping is potential to the diff temp & cooling factor
         // the cooling factor is affect by armor or other condition of the body
-        final float stepSize = 0.01F;
+        final float stepSize = 0.005F;
         float deltaTemperature = passiveShift * keepWarmFactor * stepSize;
-
+        if (Float.isNaN(deltaTemperature)) {
+            deltaTemperature = 0;
+        }
+        if (deltaTemperature > 0) {
+            status.hydration -= 0.01F;
+            deltaTemperature = Math.max(deltaTemperature - 0.01F, 0);
+        } else if (deltaTemperature < 0) {
+            playerEntity.getFoodStats().addExhaustion(0.01F);
+            deltaTemperature = Math.min(deltaTemperature + 0.01F, 0);
+        }
         status.temperature += deltaTemperature;
 
         Debug.bodyTemp = status.temperature;
