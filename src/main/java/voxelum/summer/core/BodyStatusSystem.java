@@ -216,11 +216,13 @@ public class BodyStatusSystem {
         float blockTemperature = getTemperatureShiftOnBlocks(origin, sourceTemperature);
         float entitiesTemperature = getTemperatureShiftOnEntities(origin, sourceTemperature);
         float inWaterTemperature = origin.isInWater() ? -5F : 0;
+        float runTemperature = origin.isSprinting() ? 3F : 0;
 
         return biomeTemperature
                 + blockTemperature
                 + entitiesTemperature
-                + inWaterTemperature;
+                + inWaterTemperature
+                + runTemperature;
     }
 
     public static void updateBodyStatus(PlayerEntity playerEntity,
@@ -234,21 +236,33 @@ public class BodyStatusSystem {
         // the cooling factor is affect by armor or other condition of the body
         final float stepSize = 0.005F;
         float deltaTemperature = temperatureShift * keepWarmFactor * stepSize;
+
         if (Float.isNaN(deltaTemperature)) {
             deltaTemperature = 0;
         } else if (deltaTemperature > 0.025F) {
             deltaTemperature = 0.025F;
-        } else if (deltaTemperature < 0.025F) {
+        } else if (deltaTemperature < -0.025F) {
             deltaTemperature = -0.025F;
         }
 
         // body self balancing function
-        if (status.temperature > 36.F) {
+        if (status.temperature > 36.5F) {
             status.incrementHydration(-0.002F);
             deltaTemperature = deltaTemperature - 0.02F;
-        } else if (status.temperature < 0) {
-            playerEntity.getFoodStats().addExhaustion(0.01F);
-            deltaTemperature = deltaTemperature + 0.01F;
+        } else if (status.temperature < 36.5F) {
+            if (deltaTemperature < 0) {
+                if (status.temperature < 35F) {
+                    // pretty bad
+                    playerEntity.getFoodStats().addExhaustion(0.05F);
+                    deltaTemperature = 0.01F;
+                } else {
+                    playerEntity.getFoodStats().addExhaustion(0.01F);
+                    deltaTemperature = deltaTemperature + 0.01F;
+                }
+            } else {
+                playerEntity.getFoodStats().addExhaustion(0.01F);
+                deltaTemperature = deltaTemperature + 0.01F;
+            }
         }
 
         status.temperature += deltaTemperature;

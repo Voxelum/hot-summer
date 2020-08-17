@@ -12,24 +12,6 @@ import net.minecraft.item.ItemStack;
  * This should hook to a {@link net.minecraft.item.ItemStack}
  */
 public class WarmKeeper {
-    private float getKeepWarmFactor(ItemStack stack,PlayerEntity player){
-        if(player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR,3)).equals(ArmorMaterial.DIAMOND)){
-            return 0.1f;
-        }
-        if(player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR,3)).equals(ArmorMaterial.GOLD)){
-            return 0.3f;
-        }
-        if(player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR,3)).equals(ArmorMaterial.IRON)){
-            return 0.5f;
-        }
-        if(player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR,3)).equals(ArmorMaterial.CHAIN)){
-            return 0.7f;
-        }
-        if(player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR,3)).equals(ArmorMaterial.LEATHER)){
-            return 0.9f;
-        }
-        else return 1;
-    }
     /**
      * The factor to multiply to the delta temperate.
      * - =0 for not affect the temperature apply
