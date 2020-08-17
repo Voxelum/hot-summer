@@ -6,6 +6,8 @@
   "item.hotsummer.hot_water": "热饮用水",
   "item.hotsummer.salt_water": "盐水",
   "item.hotsummer.bottle_tea": "一瓶茶水",
+  "effect.hotsummer.fever": "中暑",
+  "effect.hotsummer.freezing": "冻僵",
   "item.drinkable.dirty": "被污染",
   "item.drinkable.clean": "清洁",
   "item.drinkable.hot": "热饮",

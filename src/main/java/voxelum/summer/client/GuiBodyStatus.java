@@ -20,7 +20,7 @@ public class GuiBodyStatus {
     private static BodyStatus status = null;
 
     private static float getEnvironTemperaturePercentage() {
-        float current = status.deltaTemperature + 10;
+        float current = status.deltaTemperature + 5;
         if (current < 0) {
             return 0;
         }
@@ -31,8 +31,8 @@ public class GuiBodyStatus {
     }
 
     private static float getTemperaturePercentage() {
-        int max = 41;
-        int min = 35;
+        float max = 42F;
+        float min = 32F;
         float current = status.temperature;
         if (current < min) {
             return 0;
@@ -75,7 +75,6 @@ public class GuiBodyStatus {
             GuiHelper.drawSprite(5, 205, 0, 0, 9, (int) (76 * hydration), 9, 128, 128);
             // water icon
             GuiHelper.drawSprite(1, 202, 0, 15, 38, 14, 16, 128, 128);
-//            drawSprite(5, 225, 0, 0, 17, 55, 9, 128, 128);
 
             // temperature
             GuiHelper.drawSprite(2, 220, 0, 0, 18, 80, 18, 128, 128);
@@ -87,6 +86,10 @@ public class GuiBodyStatus {
 
             // env temperature pivot
             GuiHelper.drawSprite(4 + (int) (maxWidth * envTemperature), 225, 0, 2 + 7, 37, 4, 10, 128, 128);
+
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GuiHelper.drawString(String.format("%.2f", status.hydration) + " %", 90, 205, 0xFFFFFFFF);
+            GuiHelper.drawString(String.format("%.2f C", status.temperature), 90, 220, 0xFFFFFFFF);
         }
     }
 }

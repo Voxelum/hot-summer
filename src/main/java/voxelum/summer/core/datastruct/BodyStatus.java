@@ -9,10 +9,22 @@ import voxelum.summer.core.BodyStatusCapability;
  * @see BodyStatusCapability
  */
 public class BodyStatus extends HeatSource {
+    /**
+     * The hydration value range is 0-1
+     */
     public float hydration = 1;
 
     /**
      * The cache of delta temperature of this tick (not affect by the warm keeper and tick factor)
      */
     public float deltaTemperature;
+
+    public void incrementHydration(float hydr) {
+        hydration += hydr;
+        if (hydration > 1) {
+            hydration = 1;
+        } else if (hydration < 0) {
+            hydration = 0;
+        }
+    }
 }

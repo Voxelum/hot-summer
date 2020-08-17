@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
@@ -22,6 +23,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.network.PacketDistributor;
 import voxelum.summer.Debug;
 import voxelum.summer.HotSummerMod;
 import voxelum.summer.core.datastruct.BodyStatus;
@@ -156,7 +158,7 @@ public class BodyStatusSystem {
                 }
             }
         }
-        Debug.blockTemp = total;
+//        Debug.blockTemp = total;
 
         return total;
     }
@@ -185,7 +187,7 @@ public class BodyStatusSystem {
             }
         }
 
-        Debug.entityTemp = total;
+//        Debug.entityTemp = total;
 
         return total;
     }
@@ -196,15 +198,15 @@ public class BodyStatusSystem {
         Biome biome = world.getBiome(position);
         float biomeTemperature = transformBiomeTemperature(biome.getTemperature(position));
 
-        Debug.biomeTemp = biomeTemperature;
+//        Debug.biomeTemp = biomeTemperature;
 
         // day/night
         long currentTime = world.getDayTime();
         float downfall = biome.getDownfall();
         double shift = Math.sin(Math.PI / 12000D * currentTime);
 
-        float temperatureDayNightConstant = 25;
-        biomeTemperature += shift * (1 - downfall) * temperatureDayNightConstant;
+        float temperatureDayNightConstant = 20;
+        biomeTemperature += shift * (1 - downfall * downfall) * temperatureDayNightConstant;
 
         return biomeTemperature - sourceTemperature + DISMISS_DIFF_FACTOR;
     }
@@ -234,12 +236,16 @@ public class BodyStatusSystem {
         float deltaTemperature = temperatureShift * keepWarmFactor * stepSize;
         if (Float.isNaN(deltaTemperature)) {
             deltaTemperature = 0;
+        } else if (deltaTemperature > 0.025F) {
+            deltaTemperature = 0.025F;
+        } else if (deltaTemperature < 0.025F) {
+            deltaTemperature = -0.025F;
         }
 
         // body self balancing function
         if (status.temperature > 36.F) {
-            status.hydration -= 0.005F;
-            deltaTemperature = deltaTemperature - 0.01F;
+            status.incrementHydration(-0.002F);
+            deltaTemperature = deltaTemperature - 0.02F;
         } else if (status.temperature < 0) {
             playerEntity.getFoodStats().addExhaustion(0.01F);
             deltaTemperature = deltaTemperature + 0.01F;
@@ -247,7 +253,7 @@ public class BodyStatusSystem {
 
         status.temperature += deltaTemperature;
 
-        Debug.bodyTemp = status.temperature;
+//        Debug.bodyTemp = status.temperature;
     }
 
     public static void impactToPlayer(PlayerEntity entity, BodyStatus status) {
@@ -270,6 +276,9 @@ public class BodyStatusSystem {
 
     @SubscribeEvent
     public static void onTick(TickEvent.PlayerTickEvent event) {
+        if (event.player.world.isRemote) {
+            return;
+        }
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
@@ -278,7 +287,9 @@ public class BodyStatusSystem {
             LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
             BodyStatus bodyStatus = capability.orElseThrow(Error::new);
             BodyStatusSystem.updateBodyStatus(player, bodyStatus);
-        } else if (counter == 20) {
+
+            HotSummerMod.NETWORK.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.player), bodyStatus);
+        } else if (counter == 19) {
             PlayerEntity player = event.player;
             LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
             BodyStatus bodyStatus = capability.orElseThrow(Error::new);

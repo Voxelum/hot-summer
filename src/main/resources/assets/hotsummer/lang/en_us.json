@@ -6,6 +6,8 @@
   "item.hotsummer.hot_water": "Hot Clean Water",
   "item.hotsummer.salt_water": "Salt Water",
   "item.hotsummer.bottle_tea": "Bottle of Tea",
+  "effect.hotsummer.fever": "Heat Stroke",
+  "effect.hotsummer.freezing": "Freezing",
   "item.drinkable.dirty": "Dirty",
   "item.drinkable.clean": "Clean",
   "item.drinkable.hot": "Hot",

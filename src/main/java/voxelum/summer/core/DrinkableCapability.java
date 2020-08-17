@@ -1,22 +1,15 @@
 package voxelum.summer.core;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -30,7 +23,6 @@ import net.minecraftforge.fml.common.Mod;
 import voxelum.summer.HotSummerMod;
 import voxelum.summer.core.datastruct.BodyStatus;
 import voxelum.summer.core.datastruct.Drinkable;
-import voxelum.summer.items.DrinkableItem;
 import voxelum.summer.utils.DrinkableHelper;
 
 @Mod.EventBusSubscriber
@@ -39,14 +31,27 @@ public class DrinkableCapability {
 
     @SubscribeEvent
     public static void onItemUsed(LivingEntityUseItemEvent.Stop event) {
+        if (event.getEntity().world.isRemote) {
+            return;
+        }
         if (event.getEntity() instanceof PlayerEntity) {
             LazyOptional<Drinkable> optional = event.getItem().getCapability(HotSummerMod.CAPABILITY_DRINKABLE);
             if (optional.isPresent()) {
                 Drinkable drinkable = optional.orElseThrow(Error::new);
                 BodyStatus bodyStatus = event.getEntity().getCapability(HotSummerMod.CAPABILITY_BODY_STATUS).orElseThrow(Error::new);
 
-                bodyStatus.hydration += drinkable.hydrationRecovery;
+                bodyStatus.incrementHydration(drinkable.hydrationRecovery);
                 bodyStatus.temperature += drinkable.deltaTemperature;
+
+                if (drinkable.dirty) {
+                    World world = event.getEntity().getEntityWorld();
+                    int i = world.rand.nextInt(6);
+                    if (i == 0) {
+                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.NAUSEA, 10));
+                    } else if (i == 1) {
+                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 10));
+                    }
+                }
             }
         }
     }
@@ -57,6 +62,7 @@ public class DrinkableCapability {
         if (item == Items.POTION) {
             Provider provider = new Provider();
             provider.value.hydrationRecovery = 0.2F;
+            provider.value.deltaTemperature = -0.2F;
             event.addCapability(KEY, provider);
         } else if (item == Items.MILK_BUCKET) {
             Provider provider = new Provider();
