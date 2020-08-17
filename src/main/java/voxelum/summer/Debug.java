@@ -1,17 +1,9 @@
 package voxelum.summer;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import voxelum.summer.core.BodyAlgorithm;
-import voxelum.summer.core.datastruct.BodyStatus;
 
 @Mod.EventBusSubscriber
 public class Debug {
@@ -19,29 +11,6 @@ public class Debug {
     public static float entityTemp;
     public static float blockTemp;
     public static float bodyTemp;
-
-    private static int counter = 0;
-
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            counter += 1;
-            if (counter == 10) {
-                counter = 0;
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || counter != 1) {
-            return;
-        }
-        PlayerEntity player = event.player;
-        LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
-        BodyStatus bodyStatus = capability.orElseThrow(Error::new);
-        BodyAlgorithm.updateBodyStatus(player, bodyStatus);
-    }
 
     @SubscribeEvent
     public static void onRender(RenderGameOverlayEvent.Post event) {

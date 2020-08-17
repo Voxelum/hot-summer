@@ -9,14 +9,19 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Potions;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import voxelum.summer.Debug;
 import voxelum.summer.HotSummerMod;
 import voxelum.summer.core.datastruct.BodyStatus;
@@ -28,7 +33,9 @@ import java.util.List;
  * This is not a real physical model, but a empirical model.
  * So this class also contains some const values to fulfill the computation (which might not correspond to reality)
  */
-public class BodyAlgorithm {
+@Mod.EventBusSubscriber
+public class BodyStatusSystem {
+    private static int counter = 0;
     @SuppressWarnings("unchecked")
     private static Tuple<Block, Integer>[] BUILT_IN_BLOCK_TEMPS = new Tuple[]{
             new Tuple<>(Blocks.FURNACE, 50),
@@ -241,5 +248,41 @@ public class BodyAlgorithm {
         status.temperature += deltaTemperature;
 
         Debug.bodyTemp = status.temperature;
+    }
+
+    public static void impactToPlayer(PlayerEntity entity, BodyStatus status) {
+        if (status.temperature < 34.5F) {
+            entity.addPotionEffect(new EffectInstance(HotSummerMod.FREEZING_EFFECT.get(), 2 * 20));
+        } else if (status.temperature > 40F) {
+            entity.addPotionEffect(new EffectInstance(HotSummerMod.FEVER_EFFECT.get(), 2 * 20));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            counter += 1;
+            if (counter == 20) {
+                counter = 0;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        if (counter == 0 || counter == 10) {
+            PlayerEntity player = event.player;
+            LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
+            BodyStatus bodyStatus = capability.orElseThrow(Error::new);
+            BodyStatusSystem.updateBodyStatus(player, bodyStatus);
+        } else if (counter == 20) {
+            PlayerEntity player = event.player;
+            LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
+            BodyStatus bodyStatus = capability.orElseThrow(Error::new);
+            impactToPlayer(player, bodyStatus);
+        }
     }
 }

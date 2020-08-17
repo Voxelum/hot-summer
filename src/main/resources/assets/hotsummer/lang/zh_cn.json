@@ -1,6 +1,14 @@
 {
   "item.hotsummer.tea": "茶",
   "item.hotsummer.tea_seeds": "茶苗",
-  "item.hotsummer.cooked_tea": "茶叶"
-
+  "item.hotsummer.cooked_tea": "茶叶",
+  "item.hotsummer.ice_water": "冰饮用水",
+  "item.hotsummer.hot_water": "热饮用水",
+  "item.hotsummer.salt_water": "盐水",
+  "item.hotsummer.bottle_tea": "一瓶茶水",
+  "item.drinkable.dirty": "被污染",
+  "item.drinkable.clean": "清洁",
+  "item.drinkable.hot": "热饮",
+  "item.drinkable.cold": "冷饮",
+  "item.drinkable.normal": "常温"
 }

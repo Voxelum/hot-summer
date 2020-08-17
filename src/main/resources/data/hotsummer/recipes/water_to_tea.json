@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "hotsummer:cooked_tea"
+    },
+    {
+      "item": "hotsummer:hot_water"
+    }
+  ],
+  "result": {
+    "item": "hotsummer:bottle_tea",
+    "count": 1
+  }
+}

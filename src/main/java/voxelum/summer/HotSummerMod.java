@@ -5,17 +5,18 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.BlockNamedItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.*;
 import net.minecraft.nbt.INBT;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraft.item.PotionItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -35,6 +36,7 @@ import voxelum.summer.blocks.TeaCropsBlock;
 import voxelum.summer.core.*;
 import voxelum.summer.core.datastruct.*;
 import voxelum.summer.gen.feature.TeaFeature;
+import voxelum.summer.items.DrinkableItem;
 import voxelum.summer.utils.CapabilityUtils;
 
 import javax.annotation.Nullable;
@@ -46,6 +48,8 @@ public class HotSummerMod {
 
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
+
+    public static final DeferredRegister<Effect> EFFECTS_REGISTRY = new DeferredRegister<>(ForgeRegistries.POTIONS, MODID);
     public static final DeferredRegister<Item> ITEMS_REGISTRY = new DeferredRegister<>(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS_REGISTRY = new DeferredRegister<>(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Feature<?>> FEATURE_REGISTRY = new DeferredRegister<>(ForgeRegistries.FEATURES, MODID);
@@ -59,10 +63,36 @@ public class HotSummerMod {
             () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
     public static final RegistryObject<Item> COOKED_TEA_ITEM = ITEMS_REGISTRY.register("cooked_tea",
             () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
-    public static final RegistryObject<Item> CUP_TEA_ITEM = ITEMS_REGISTRY.register("cuptea",
-            () -> new PotionItem(new Item.Properties().group(ItemGroup.BREWING)));
+
+    public static final RegistryObject<Item> BOTTLE_TEA_ITEM = ITEMS_REGISTRY.register("bottle_tea",
+            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
+
+    public static final RegistryObject<Item> HOT_WATER_ITEM = ITEMS_REGISTRY.register("hot_water",
+            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
+    public static final RegistryObject<Item> ICE_WATER_ITEM = ITEMS_REGISTRY.register("ice_water",
+            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
+    public static final RegistryObject<Item> SALT_WATER_ITEM = ITEMS_REGISTRY.register("salt_water",
+            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
 
     public static final RegistryObject<Feature<NoFeatureConfig>> TEA_FEATURE = FEATURE_REGISTRY.register("tea_crop", TeaFeature::new);
+
+    public static final RegistryObject<Effect> FREEZING_EFFECT = EFFECTS_REGISTRY.register("freezing",
+            () -> new Effect(EffectType.HARMFUL, 0) {
+                @Override
+                public void performEffect(LivingEntity entityLivingBaseIn, int amplifier) {
+                    DamageSource damageSource = new DamageSource("freezing");
+                    entityLivingBaseIn.attackEntityFrom(damageSource, 1);
+                }
+            });
+
+    public static final RegistryObject<Effect> FEVER_EFFECT = EFFECTS_REGISTRY.register("fever",
+            () -> new Effect(EffectType.HARMFUL, 0) {
+                @Override
+                public void performEffect(LivingEntity entityLivingBaseIn, int amplifier) {
+                    DamageSource damageSource = new DamageSource("fever");
+                    entityLivingBaseIn.attackEntityFrom(damageSource, 1);
+                }
+            });
 
     @CapabilityInject(BodyStatus.class)
     public static Capability<BodyStatus> CAPABILITY_BODY_STATUS = null;
@@ -72,6 +102,9 @@ public class HotSummerMod {
 
     @CapabilityInject(HeatSource.class)
     public static Capability<HeatSource> CAPABILITY_HEAT_SOURCE = null;
+
+    @CapabilityInject(Drinkable.class)
+    public static Capability<Drinkable> CAPABILITY_DRINKABLE = null;
 
     @CapabilityInject(ChunkHeatSources.class)
     public static Capability<ChunkHeatSources> CAPABILITY_CHUNK_HEAT_SOURCES = null;
@@ -91,7 +124,6 @@ public class HotSummerMod {
         CapabilityManager.INSTANCE.register(ChunkHeatSources.class, CapabilityUtils.emptyStorage(), ChunkHeatSources::new);
 
         Biomes.MOUNTAINS.addFeature(GenerationStage.Decoration.VEGETAL_DECORATION, TEA_FEATURE.get().withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG));
-
     }
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
