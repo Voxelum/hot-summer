@@ -8,9 +8,4 @@ public class Foods {
             .saturation(0.1F)
             .setAlwaysEdible()
             .build();
-    public static final Food COKE = new Food.Builder()
-            .hunger(1)
-            .saturation(0.1F)
-            .setAlwaysEdible()
-            .build();
 }

@@ -13,6 +13,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import voxelum.summer.HotSummerMod;
+import voxelum.summer.core.datastruct.BodyStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -32,8 +32,6 @@ public class TeaFeature extends Feature<NoFeatureConfig> {
         int i = 0;
         BlockPos height = worldIn.getHeight(Heightmap.Type.WORLD_SURFACE_WG, pos);
         BlockState under = worldIn.getBlockState(height.add(0, -1, 0));
-        System.out.println(height);
-        System.out.println(under.getBlock());
         if (worldIn.isAirBlock(height)
                 && under.getBlock() == Blocks.GRASS_BLOCK) {
             worldIn.setBlockState(height, TEA_BASE_STATE, 2);

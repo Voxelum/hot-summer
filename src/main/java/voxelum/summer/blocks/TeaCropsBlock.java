@@ -11,6 +11,10 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import voxelum.summer.HotSummerMod;
 
+/**
+ * The crop block of the tea. This is a copy of the potato crop block I think.
+ * No special logic here
+ */
 public class TeaCropsBlock extends CropsBlock {
     public TeaCropsBlock(Properties builder) {
         super(builder);

@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FurnaceBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -15,22 +16,54 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import voxelum.summer.Debug;
 import voxelum.summer.HotSummerMod;
+import voxelum.summer.core.datastruct.BodyStatus;
 
 import java.util.List;
 
+/**
+ * The class to compute the body temperature.
+ * This is not a real physical model, but a empirical model.
+ * So this class also contains some const values to fulfill the computation (which might not correspond to reality)
+ */
 public class BodyAlgorithm {
-//    private static final Object2IntAVLTreeMap<BlockState> BLOCK_HEAT_REG = new Object2IntAVLTreeMap<>();
-//
-//    static {
-//        BLOCK_HEAT_REG.defaultReturnValue(0);
-//        for (BlockState state : Blocks.LAVA.getStateContainer().getValidStates()) {
-//            BLOCK_HEAT_REG.put(state, 100);
-//        }
-//    }
+    @SuppressWarnings("unchecked")
+    private static Tuple<Block, Integer>[] BUILT_IN_BLOCK_TEMPS = new Tuple[]{
+            new Tuple<>(Blocks.FURNACE, 50),
+            new Tuple<>(Blocks.BLAST_FURNACE, 70),
+            new Tuple<>(Blocks.TORCH, 30),
+            new Tuple<>(Blocks.LAVA, 100),
+            new Tuple<>(Blocks.FIRE, 100),
+            new Tuple<>(Blocks.ICE, -5),
+            new Tuple<>(Blocks.BLUE_ICE, -5),
+            new Tuple<>(Blocks.FROSTED_ICE, -5),
+            new Tuple<>(Blocks.PACKED_ICE, -5),
+    };
 
+    @SuppressWarnings("unchecked")
+    private static Tuple<EntityType, Integer>[] BUILT_IN_ENTITY_TEMPS = new Tuple[]{
+            new Tuple<>(EntityType.SHEEP, 38),
+            new Tuple<>(EntityType.COW, 30),
+            new Tuple<>(EntityType.CHICKEN, 20),
+            new Tuple<>(EntityType.RABBIT, 20),
+            new Tuple<>(EntityType.CAT, 20),
+            new Tuple<>(EntityType.WOLF, 30),
+            new Tuple<>(EntityType.VILLAGER, 27),
+    };
+
+    /**
+     * The factor to dismiss the diff between outside temperature and body temperature.
+     * Body standard temperature is about 37C but we feel good if the outside is about 27C.
+     */
     static final int DISMISS_DIFF_FACTOR = 10;
 
+    /**
+     * From environmine, transform mc temperature value to the value more approached to reality
+     *
+     * @param biomeTemperature The minecraft biome temperature value
+     * @return The temperature approach to the reality
+     */
     public static float transformBiomeTemperature(float biomeTemperature) {
         // You can calibrate temperatures using these
         // This does not take into account the time of day (These are the midday maximums)
@@ -40,6 +73,11 @@ public class BodyAlgorithm {
         return biomeTemperature >= 0 ? MathHelper.sin(temp) * maxTemp : MathHelper.sin(temp) * minTemp;
     }
 
+    /**
+     * Get the keep warm factor from player armor.
+     *
+     * @return The total keep warm factor
+     */
     public static float computeKeepWarmFactor(PlayerEntity playerEntity) {
         ItemStack head = playerEntity.getItemStackFromSlot(EquipmentSlotType.HEAD);
         ItemStack chest = playerEntity.getItemStackFromSlot(EquipmentSlotType.CHEST);
@@ -64,12 +102,14 @@ public class BodyAlgorithm {
                 .orElse(Float.MIN_VALUE);
     }
 
-    @SuppressWarnings("unchecked")
-    private static Tuple<Block, Integer>[] BUILT_IN_BLOCK_TEMPS = new Tuple[]{
-            new Tuple<>(Blocks.LAVA, 100),
-            new Tuple<>(Blocks.FIRE, 100),
-            new Tuple<>(Blocks.ICE, -10),
-    };
+    public static float getEntityTemperature(LivingEntity entity) {
+        for (int i = 0; i < BUILT_IN_ENTITY_TEMPS.length; i++) {
+            if (BUILT_IN_ENTITY_TEMPS[i].getA() == entity.getType()) {
+                return BUILT_IN_ENTITY_TEMPS[i].getB();
+            }
+        }
+        return getTemperature(entity);
+    }
 
     public static float getTemperatureOfBlock(BlockState blockState) {
         Block block = blockState.getBlock();
@@ -102,8 +142,8 @@ public class BodyAlgorithm {
                     if (temperature != Float.MIN_VALUE) {
                         // Manhattan Distance
                         int dis = Math.abs(x) + Math.abs(y) + Math.abs(z);
-                        float factor = dis == 0 ? 1F : 1F / dis * 0.01F;
-                        total += factor * (temperature - sourceTemperature + DISMISS_DIFF_FACTOR);
+                        float distanceFactor = dis == 0 ? 1F : 1F / dis * 0.01F;
+                        total += distanceFactor * (temperature - sourceTemperature + DISMISS_DIFF_FACTOR);
                     }
                 }
             }
@@ -117,19 +157,26 @@ public class BodyAlgorithm {
         World world = origin.world;
 
         float total = 0;
-        List<Entity> others = world.getEntitiesWithinAABBExcludingEntity(origin, origin.getBoundingBox().expand(3, 3, 3));
+        List<Entity> others = world.getEntitiesWithinAABBExcludingEntity(origin, origin.getBoundingBox().expand(3, 3, 3).expand(-3, -3, -3));
         for (Entity other : others) {
-            float temperature = getTemperature(other);
-            if (temperature != Float.MIN_VALUE) {
-                BlockPos src = other.getPosition();
-                BlockPos des = origin.getPosition();
-                int dis = Math.abs(src.getX() - des.getX())
-                        + Math.abs(src.getY() - des.getY())
-                        + Math.abs(src.getZ() - des.getZ());
-                float factor = 1 - 0.05F * dis;
-                total += factor * (temperature - sourceTemperature + DISMISS_DIFF_FACTOR);
+            if (other instanceof LivingEntity) {
+                float temperature = getEntityTemperature((LivingEntity) other);
+                if (temperature != Float.MIN_VALUE) {
+                    BlockPos src = other.getPosition();
+                    BlockPos des = origin.getPosition();
+                    int dis = Math.abs(src.getX() - des.getX())
+                            + Math.abs(src.getY() - des.getY())
+                            + Math.abs(src.getZ() - des.getZ());
+                    float factor = dis == 0 ? 1F : 1F / dis;
+                    total += factor * (temperature - sourceTemperature + DISMISS_DIFF_FACTOR);
+                }
+            } else {
+                // skip for now
+                // later we might add mob temperature
+                continue;
             }
         }
+
         Debug.entityTemp = total;
 
         return total;
@@ -143,6 +190,14 @@ public class BodyAlgorithm {
 
         Debug.biomeTemp = biomeTemperature;
 
+        // day/night
+        long currentTime = world.getDayTime();
+        float downfall = biome.getDownfall();
+        double shift = Math.sin(Math.PI / 12000D * currentTime);
+
+        float temperatureDayNightConstant = 25;
+        biomeTemperature += shift * (1 - downfall) * temperatureDayNightConstant;
+
         return biomeTemperature - sourceTemperature + DISMISS_DIFF_FACTOR;
     }
 
@@ -150,31 +205,38 @@ public class BodyAlgorithm {
         float biomeTemperature = getTemperatureShiftOnBiome(origin, sourceTemperature);
         float blockTemperature = getTemperatureShiftOnBlocks(origin, sourceTemperature);
         float entitiesTemperature = getTemperatureShiftOnEntities(origin, sourceTemperature);
+        float inWaterTemperature = origin.isInWater() ? -5F : 0;
 
         return biomeTemperature
                 + blockTemperature
-                + entitiesTemperature;
+                + entitiesTemperature
+                + inWaterTemperature;
     }
 
     public static void updateBodyStatus(PlayerEntity playerEntity,
                                         BodyStatus status) {
 
         float keepWarmFactor = computeKeepWarmFactor(playerEntity);
-        float passiveShift = getPassiveTemperatureShift(playerEntity, status.temperature);
+        // temperature shift is a positive or negative value that computed from environment
+        float temperatureShift = getPassiveTemperatureShift(playerEntity, status.temperature);
+        status.deltaTemperature = temperatureShift;
         // the heat dropping is potential to the diff temp & cooling factor
         // the cooling factor is affect by armor or other condition of the body
         final float stepSize = 0.005F;
-        float deltaTemperature = passiveShift * keepWarmFactor * stepSize;
+        float deltaTemperature = temperatureShift * keepWarmFactor * stepSize;
         if (Float.isNaN(deltaTemperature)) {
             deltaTemperature = 0;
         }
-        if (deltaTemperature > 0) {
+
+        // body self balancing function
+        if (status.temperature > 36.F) {
             status.hydration -= 0.01F;
-            deltaTemperature = Math.max(deltaTemperature - 0.01F, 0);
-        } else if (deltaTemperature < 0) {
+            deltaTemperature = deltaTemperature - 0.01F;
+        } else if (status.temperature < 0) {
             playerEntity.getFoodStats().addExhaustion(0.01F);
-            deltaTemperature = Math.min(deltaTemperature + 0.01F, 0);
+            deltaTemperature = deltaTemperature + 0.01F;
         }
+
         status.temperature += deltaTemperature;
 
         Debug.bodyTemp = status.temperature;

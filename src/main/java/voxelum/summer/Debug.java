@@ -1,4 +1,4 @@
-package voxelum.summer.core;
+package voxelum.summer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -10,7 +10,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import voxelum.summer.HotSummerMod;
+import voxelum.summer.core.BodyAlgorithm;
+import voxelum.summer.core.datastruct.BodyStatus;
 
 @Mod.EventBusSubscriber
 public class Debug {
@@ -49,15 +50,6 @@ public class Debug {
             Minecraft.getInstance().fontRenderer.drawString(String.format("%.2f", entityTemp) + "", 0, 10, 0);
             Minecraft.getInstance().fontRenderer.drawString(String.format("%.2f", blockTemp), 0, 20, 0);
             Minecraft.getInstance().fontRenderer.drawString(String.format("%.2f", biomeTemp), 0, 30, 0);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (event.getEntity() == player) {
-            BlockPos position = player.getPosition();
-            event.getWorld().getChunk(position);
         }
     }
 }
