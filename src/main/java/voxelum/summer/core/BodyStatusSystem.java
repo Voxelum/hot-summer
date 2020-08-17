@@ -251,10 +251,10 @@ public class BodyStatusSystem {
             deltaTemperature = deltaTemperature - 0.02F;
         } else if (status.temperature < 36.5F) {
             if (deltaTemperature < 0) {
-                if (status.temperature < 35F) {
+                if (status.temperature < 36F) {
                     // pretty bad
                     playerEntity.getFoodStats().addExhaustion(0.05F);
-                    deltaTemperature = 0.01F;
+                    deltaTemperature = 0.05F;
                 } else {
                     playerEntity.getFoodStats().addExhaustion(0.01F);
                     deltaTemperature = deltaTemperature + 0.01F;

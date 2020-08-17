@@ -47,9 +47,9 @@ public class DrinkableCapability {
                     World world = event.getEntity().getEntityWorld();
                     int i = world.rand.nextInt(6);
                     if (i == 0) {
-                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.NAUSEA, 10));
+                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.NAUSEA, 10 * 2000));
                     } else if (i == 1) {
-                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 10));
+                        ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 10 * 2000));
                     }
                 }
             }

@@ -20,14 +20,14 @@ public class GuiBodyStatus {
     private static BodyStatus status = null;
 
     private static float getEnvironTemperaturePercentage() {
-        float current = status.deltaTemperature + 5;
+        float current = status.deltaTemperature + 10;
         if (current < 0) {
             return 0;
         }
-        if (current > 10) {
+        if (current > 20) {
             return 1;
         }
-        return (current) / 10;
+        return (current) / 20;
     }
 
     private static float getTemperaturePercentage() {
@@ -88,7 +88,7 @@ public class GuiBodyStatus {
             GuiHelper.drawSprite(4 + (int) (maxWidth * envTemperature), 225, 0, 2 + 7, 37, 4, 10, 128, 128);
 
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GuiHelper.drawString(String.format("%.2f", status.hydration) + " %", 90, 205, 0xFFFFFFFF);
+            GuiHelper.drawString(String.format("%.2f", status.hydration * 100) + " %", 90, 205, 0xFFFFFFFF);
             GuiHelper.drawString(String.format("%.2f C", status.temperature), 90, 220, 0xFFFFFFFF);
         }
     }
