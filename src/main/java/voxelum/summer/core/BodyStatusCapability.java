@@ -30,14 +30,14 @@ public class BodyStatusCapability {
     /**
      * The capability location
      */
-    public static final ResourceLocation CAPAIBLITY_BODY_STATUS_LOCATION = new ResourceLocation(MODID, "body_status");
+    public static final ResourceLocation KEY = new ResourceLocation(MODID, "body_status");
     public static final Storage STORAGE = new Storage();
 
     // register the capability to PlayerEntity
     @SubscribeEvent
     public static void onCapabilityAttached(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof PlayerEntity) {
-            event.addCapability(CAPAIBLITY_BODY_STATUS_LOCATION, new Provider());
+            event.addCapability(KEY, new Provider());
         }
     }
 

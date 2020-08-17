@@ -1,6 +1,7 @@
 package voxelum.summer.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Matrix4f;
@@ -11,6 +12,10 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 public class GuiHelper {
     public static void fillRect(int x1, int y1, int x2, int y2, int color) {
         AbstractGui.fill(x1, y1, x2, y2, color);
+    }
+
+    public static void drawString(String text, int x, int y, int color) {
+        Minecraft.getInstance().fontRenderer.drawString(text, x, y, color);
     }
 
     public static void drawSprite(int x, int y, int offset, float u, float v, int width, int height, int textureWidth, int textureHeight) {

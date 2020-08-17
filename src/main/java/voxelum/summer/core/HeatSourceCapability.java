@@ -28,7 +28,7 @@ public class HeatSourceCapability {
     /**
      * The capability location
      */
-    public static final ResourceLocation CAPABILITY_HEAT_SOURCE_LOCATION = new ResourceLocation(MODID, "heat_source");
+    public static final ResourceLocation KEY = new ResourceLocation(MODID, "heat_source");
 
     // register the capability to PlayerEntity
     @SubscribeEvent

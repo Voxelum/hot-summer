@@ -17,6 +17,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import voxelum.summer.Debug;
 import voxelum.summer.HotSummerMod;
 import voxelum.summer.core.datastruct.BodyStatus;
@@ -28,7 +32,10 @@ import java.util.List;
  * This is not a real physical model, but a empirical model.
  * So this class also contains some const values to fulfill the computation (which might not correspond to reality)
  */
-public class BodyAlgorithm {
+@Mod.EventBusSubscriber
+public class BodyStatusSystem {
+    private static int counter = 0;
+
     @SuppressWarnings("unchecked")
     private static Tuple<Block, Integer>[] BUILT_IN_BLOCK_TEMPS = new Tuple[]{
             new Tuple<>(Blocks.FURNACE, 50),
@@ -233,7 +240,7 @@ public class BodyAlgorithm {
         if (status.temperature > 36.F) {
             status.hydration -= 0.005F;
             deltaTemperature = deltaTemperature - 0.01F;
-        } else if (status.temperature < 0) {
+        } else if (status.temperature < 36F) {
             playerEntity.getFoodStats().addExhaustion(0.01F);
             deltaTemperature = deltaTemperature + 0.01F;
         }
@@ -242,4 +249,25 @@ public class BodyAlgorithm {
 
         Debug.bodyTemp = status.temperature;
     }
+
+//    @SubscribeEvent
+//    public static void onServerTick(TickEvent.ServerTickEvent event) {
+//        if (event.phase == TickEvent.Phase.START) {
+//            counter += 1;
+//            if (counter == 10) {
+//                counter = 0;
+//            }
+//        }
+//    }
+//
+//    @SubscribeEvent
+//    public static void onTick(TickEvent.PlayerTickEvent event) {
+//        if (event.phase != TickEvent.Phase.END || counter != 1) {
+//            return;
+//        }
+//        PlayerEntity player = event.player;
+//        LazyOptional<BodyStatus> capability = player.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS);
+//        BodyStatus bodyStatus = capability.orElseThrow(Error::new);
+//        updateBodyStatus(player, bodyStatus);
+//    }
 }

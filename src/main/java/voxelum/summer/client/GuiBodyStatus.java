@@ -20,7 +20,7 @@ public class GuiBodyStatus {
     private static BodyStatus status = null;
 
     private static float getEnvironTemperaturePercentage() {
-        float current = status.deltaTemperature + 10;
+        float current = status.deltaTemperature + 15;
         if (current < 0) {
             return 0;
         }
@@ -31,8 +31,8 @@ public class GuiBodyStatus {
     }
 
     private static float getTemperaturePercentage() {
-        int max = 41;
-        int min = 35;
+        int max = 45;
+        int min = 33;
         float current = status.temperature;
         if (current < min) {
             return 0;
@@ -87,6 +87,8 @@ public class GuiBodyStatus {
 
             // env temperature pivot
             GuiHelper.drawSprite(4 + (int) (maxWidth * envTemperature), 225, 0, 2 + 7, 37, 4, 10, 128, 128);
+
+//            GuiHelper.drawString(status.deltaTemperature);
         }
     }
 }

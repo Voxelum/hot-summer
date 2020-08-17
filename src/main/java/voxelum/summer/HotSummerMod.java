@@ -8,14 +8,12 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.BlockNamedItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
+import net.minecraft.item.PotionItem;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraft.item.PotionItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -32,12 +30,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import voxelum.summer.blocks.TeaCropsBlock;
-import voxelum.summer.core.*;
+import voxelum.summer.core.BodyStatusCapability;
 import voxelum.summer.core.datastruct.*;
 import voxelum.summer.gen.feature.TeaFeature;
 import voxelum.summer.utils.CapabilityUtils;
-
-import javax.annotation.Nullable;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HotSummerMod.MODID)
@@ -91,7 +87,6 @@ public class HotSummerMod {
         CapabilityManager.INSTANCE.register(ChunkHeatSources.class, CapabilityUtils.emptyStorage(), ChunkHeatSources::new);
 
         Biomes.MOUNTAINS.addFeature(GenerationStage.Decoration.VEGETAL_DECORATION, TEA_FEATURE.get().withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG));
-
     }
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
