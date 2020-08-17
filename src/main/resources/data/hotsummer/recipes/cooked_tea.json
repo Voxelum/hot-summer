@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "hotsummer:tea"
+  },
+  "result": "hotsummer:cooked_tea",
+  "experience": 0.35,
+  "cookingtime": 200
+}

@@ -57,6 +57,8 @@ public class HotSummerMod {
                     .sound(SoundType.CROP)));
     public static final RegistryObject<Item> TEA_ITEM = ITEMS_REGISTRY.register("tea",
             () -> new BlockNamedItem(TEA_CORP_BLOCK.get(), new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
+    public static final RegistryObject<Item> COOKED_TEA_ITEM = ITEMS_REGISTRY.register("cooked_tea",
+            () -> new Item(new Item.Properties().group(ItemGroup.FOOD).food(Foods.TEA)));
     public static final RegistryObject<Item> CUP_TEA_ITEM = ITEMS_REGISTRY.register("cuptea",
             () -> new PotionItem(new Item.Properties().group(ItemGroup.BREWING)));
 

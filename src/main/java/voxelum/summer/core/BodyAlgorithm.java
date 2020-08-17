@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
@@ -230,7 +231,7 @@ public class BodyAlgorithm {
 
         // body self balancing function
         if (status.temperature > 36.F) {
-            status.hydration -= 0.01F;
+            status.hydration -= 0.005F;
             deltaTemperature = deltaTemperature - 0.01F;
         } else if (status.temperature < 0) {
             playerEntity.getFoodStats().addExhaustion(0.01F);
