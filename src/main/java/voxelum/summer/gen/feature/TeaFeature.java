@@ -29,26 +29,14 @@ public class TeaFeature extends Feature<NoFeatureConfig> {
 
     @Override
     public boolean place(IWorld worldIn, ChunkGenerator<? extends GenerationSettings> generator, Random rand, BlockPos pos, NoFeatureConfig config) {
-
-        System.out.println(pos);
-        if (rand.nextInt(2) == 1) {
-            findAndSetPlace(pos, rand, worldIn);
+        int i = 0;
+        BlockPos height = worldIn.getHeight(Heightmap.Type.WORLD_SURFACE_WG, pos);
+        BlockState under = worldIn.getBlockState(height.add(0, -1, 0));
+        if (worldIn.isAirBlock(height)
+                && under.getBlock() == Blocks.GRASS_BLOCK) {
+            worldIn.setBlockState(height, TEA_BASE_STATE, 2);
         }
         return false;
-        // BlockPos height = worldIn.getHeight(Heightmap.Type.WORLD_SURFACE_WG, pos);
-       // BlockState under = worldIn.getBlockState(height.add(0, -1, 0));
-    }
-
-    public void findAndSetPlace(BlockPos pos, Random rand, IWorld worldIn) {
-        int max = rand.nextInt(4) + 2;
-        int i = 0;
-        while (i < max) {
-            BlockPos randPos = pos.add(rand.nextInt(5) - rand.nextInt(5), rand.nextInt(2) - rand.nextInt(2), rand.nextInt(5) - rand.nextInt(5));
-            if (worldIn.isAirBlock(randPos) && worldIn.getBlockState(randPos.add(0,-1,0)).getBlock() == Blocks.GRASS_BLOCK) {
-                worldIn.setBlockState(randPos, TEA_BASE_STATE, 2);
-                i++;
-            }
-        }
     }
 
 }

@@ -11,7 +11,6 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.biome.DefaultBiomeFeatures;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
@@ -23,14 +22,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,10 +33,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import voxelum.summer.blocks.TeaCropsBlock;
 import voxelum.summer.core.*;
+import voxelum.summer.core.datastruct.*;
 import voxelum.summer.gen.feature.TeaFeature;
+import voxelum.summer.utils.CapabilityUtils;
 
 import javax.annotation.Nullable;
-import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HotSummerMod.MODID)
@@ -82,99 +78,18 @@ public class HotSummerMod {
         ITEMS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
         BLOCKS_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
         FEATURE_REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
-
-        // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-        // Register the doClientStuff method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-
-        // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
         CapabilityManager.INSTANCE.register(BodyStatus.class, BodyStatusCapability.STORAGE, BodyStatus::new);
-        CapabilityManager.INSTANCE.register(Drinkable.class, new Capability.IStorage<Drinkable>() {
-            @Nullable
-            @Override
-            public INBT writeNBT(Capability<Drinkable> capability, Drinkable instance, Direction side) {
-                return null;
-            }
-
-            @Override
-            public void readNBT(Capability<Drinkable> capability, Drinkable instance, Direction side, INBT nbt) {
-
-            }
-        }, Drinkable::new);
-        CapabilityManager.INSTANCE.register(HeatSource.class, new Capability.IStorage<HeatSource>() {
-            @Nullable
-            @Override
-            public INBT writeNBT(Capability<HeatSource> capability, HeatSource instance, Direction side) {
-                return null;
-            }
-
-            @Override
-            public void readNBT(Capability<HeatSource> capability, HeatSource instance, Direction side, INBT nbt) {
-
-            }
-        }, HeatSource::new);
-        CapabilityManager.INSTANCE.register(WarmKeeper.class, new Capability.IStorage<WarmKeeper>() {
-            @Nullable
-            @Override
-            public INBT writeNBT(Capability<WarmKeeper> capability, WarmKeeper instance, Direction side) {
-                return null;
-            }
-
-            @Override
-            public void readNBT(Capability<WarmKeeper> capability, WarmKeeper instance, Direction side, INBT nbt) {
-
-            }
-        }, WarmKeeper::new);
-        CapabilityManager.INSTANCE.register(ChunkHeatSources.class, new Capability.IStorage<ChunkHeatSources>() {
-            @Nullable
-            @Override
-            public INBT writeNBT(Capability<ChunkHeatSources> capability, ChunkHeatSources instance, Direction side) {
-                return null;
-            }
-
-            @Override
-            public void readNBT(Capability<ChunkHeatSources> capability, ChunkHeatSources instance, Direction side, INBT nbt) {
-
-            }
-        }, ChunkHeatSources::new);
+        CapabilityManager.INSTANCE.register(Drinkable.class, CapabilityUtils.emptyStorage(), Drinkable::new);
+        CapabilityManager.INSTANCE.register(HeatSource.class, CapabilityUtils.emptyStorage(), HeatSource::new);
+        CapabilityManager.INSTANCE.register(WarmKeeper.class, CapabilityUtils.emptyStorage(), WarmKeeper::new);
+        CapabilityManager.INSTANCE.register(ChunkHeatSources.class, CapabilityUtils.emptyStorage(), ChunkHeatSources::new);
 
         Biomes.MOUNTAINS.addFeature(GenerationStage.Decoration.VEGETAL_DECORATION, TEA_FEATURE.get().withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG));
-    }
 
-    private void doClientStuff(final FMLClientSetupEvent event) {
-        // do something that can only be done on the client
-        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
-    }
-
-    private void enqueueIMC(final InterModEnqueueEvent event) {
-        // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> {
-            LOGGER.info("Hello world from the MDK");
-            return "Hello world";
-        });
-    }
-
-    private void processIMC(final InterModProcessEvent event) {
-        // some example code to receive and process InterModComms from other mods
-        LOGGER.info("Got IMC {}", event.getIMCStream().
-                map(m -> m.getMessageSupplier().get()).
-                collect(Collectors.toList()));
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        // do something when the server starts
-        LOGGER.info("HELLO from server starting");
     }
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
