@@ -3,7 +3,7 @@
   "ingredient": {
     "item": "minecraft:potion"
   },
-  "result": "hotsummer:hot_water",
+  "result": "hotsummer:fresh_water",
   "experience": 0.35,
   "cookingtime": 200
 }

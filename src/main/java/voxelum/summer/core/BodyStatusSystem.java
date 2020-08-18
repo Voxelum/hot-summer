@@ -13,6 +13,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Potions;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -203,10 +204,12 @@ public class BodyStatusSystem {
         // day/night
         long currentTime = world.getDayTime();
         float downfall = biome.getDownfall();
-        double shift = Math.sin(Math.PI / 12000D * currentTime);
 
+        double shift = Math.sin(Math.PI / 12000D * currentTime);
         float temperatureDayNightConstant = 20;
         biomeTemperature += shift * (1 - downfall * downfall) * temperatureDayNightConstant;
+
+//        transformBiomeTemperatureAccordingToTime()
 
         return biomeTemperature - sourceTemperature + DISMISS_DIFF_FACTOR;
     }
@@ -275,6 +278,10 @@ public class BodyStatusSystem {
             entity.addPotionEffect(new EffectInstance(HotSummerMod.FREEZING_EFFECT.get(), 2 * 20));
         } else if (status.temperature > 40F) {
             entity.addPotionEffect(new EffectInstance(HotSummerMod.FEVER_EFFECT.get(), 2 * 20));
+        }
+        if (status.hydration == 0) {
+            DamageSource dehydration = new DamageSource("dehydration");
+            entity.attackEntityFrom(dehydration, 1F);
         }
     }
 

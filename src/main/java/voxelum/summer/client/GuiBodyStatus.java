@@ -88,8 +88,8 @@ public class GuiBodyStatus {
             GuiHelper.drawSprite(4 + (int) (maxWidth * envTemperature), 225, 0, 2 + 7, 37, 4, 10, 128, 128);
 
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GuiHelper.drawString(String.format("%.2f", status.hydration * 100) + " %", 90, 205, 0xFFFFFFFF);
-            GuiHelper.drawString(String.format("%.2f C", status.temperature), 90, 220, 0xFFFFFFFF);
+            GuiHelper.drawString(String.format("%.2f", status.hydration * 100) + "%", 85, 206, 0xFFFFFFFF);
+            GuiHelper.drawString(String.format("%.2fC", status.temperature), 85, 226, 0xFFFFFFFF);
         }
     }
 }

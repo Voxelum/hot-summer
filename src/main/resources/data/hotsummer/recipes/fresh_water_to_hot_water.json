@@ -1,9 +1,9 @@
 {
   "type": "minecraft:smelting",
   "ingredient": {
-    "item": "hotsummer:salt_water"
+    "item": "hotsummer:fresh_water"
   },
-  "result": "hotsummer:hot_water",
+  "result": "hotsummer:fresh_water",
   "experience": 0.35,
   "cookingtime": 200
 }

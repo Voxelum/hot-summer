@@ -6,14 +6,21 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockNamedItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
@@ -40,12 +47,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import voxelum.summer.blocks.TeaCropsBlock;
 import voxelum.summer.core.BodyStatusCapability;
+import voxelum.summer.core.BodyStatusSystem;
+import voxelum.summer.core.DrinkableSystem;
 import voxelum.summer.core.datastruct.*;
+import voxelum.summer.core.message.DrinkWaterMessage;
 import voxelum.summer.gen.feature.TeaFeature;
 import voxelum.summer.items.DrinkableItem;
 import voxelum.summer.utils.CapabilityUtils;
 import voxelum.summer.utils.ClientStatusHelper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -75,11 +88,7 @@ public class HotSummerMod {
     public static final RegistryObject<Item> BOTTLE_TEA_ITEM = ITEMS_REGISTRY.register("bottle_tea",
             () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
 
-    public static final RegistryObject<Item> HOT_WATER_ITEM = ITEMS_REGISTRY.register("hot_water",
-            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
-    public static final RegistryObject<Item> ICE_WATER_ITEM = ITEMS_REGISTRY.register("ice_water",
-            () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
-    public static final RegistryObject<Item> SALT_WATER_ITEM = ITEMS_REGISTRY.register("salt_water",
+    public static final RegistryObject<Item> FRESH_WATER_ITEM = ITEMS_REGISTRY.register("fresh_water",
             () -> new DrinkableItem(new Item.Properties().group(ItemGroup.FOOD), Items.GLASS_BOTTLE));
 
     public static final RegistryObject<Feature<NoFeatureConfig>> TEA_FEATURE = FEATURE_REGISTRY.register("tea_crop", TeaFeature::new);
@@ -99,6 +108,16 @@ public class HotSummerMod {
                 public void performEffect(LivingEntity entityLivingBaseIn, int amplifier) {
                     DamageSource damageSource = new DamageSource("fever");
                     entityLivingBaseIn.attackEntityFrom(damageSource, 1);
+                }
+            });
+
+    public static final RegistryObject<Effect> DEHYDRATION_EFFECT = EFFECTS_REGISTRY.register("dehydration",
+            () -> new Effect(EffectType.HARMFUL, 0) {
+                @Override
+                public void performEffect(LivingEntity entityLivingBaseIn, int amplifier) {
+                    entityLivingBaseIn.getCapability(CAPABILITY_BODY_STATUS).ifPresent((b) -> {
+                        b.incrementHydration(-0.1F);
+                    });
                 }
             });
 
@@ -156,6 +175,43 @@ public class HotSummerMod {
             contextSupplier.get().enqueueWork(() -> ClientStatusHelper.updateClientStatus(msg));
             contextSupplier.get().setPacketHandled(true);
         }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        NETWORK.registerMessage(1, DrinkWaterMessage.class, (m, packet) -> {
+            packet.writeBlockPos(m.pos);
+        }, (p) -> DrinkWaterMessage.of(p.readBlockPos()), (msg, context) -> {
+            context.get().enqueueWork(() -> {
+                ServerPlayerEntity sender = context.get().getSender();
+                World world = sender.world;
+                BlockPos pos = msg.pos;
+                world.playSound(sender, pos, SoundEvents.ENTITY_GENERIC_DRINK, SoundCategory.BLOCKS, 2F, 1F);
+                Drinkable drinkable = new Drinkable();
+                DrinkableSystem.decorateDrinkable(drinkable, world, pos);
+                DrinkableSystem.drink(sender, sender.getCapability(HotSummerMod.CAPABILITY_BODY_STATUS).orElseThrow(Error::new), drinkable);
+            });
+            context.get().setPacketHandled(true);
+        }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        dumpBiome();
+    }
+
+    static void dumpBiome() {
+        StringBuilder builder = new StringBuilder();
+        for (Biome biome : Biome.BIOMES) {
+            String name = biome.getRegistryName().toString();
+            float defaultTemperature = biome.getDefaultTemperature();
+            float downfall = biome.getDownfall();
+            float defaultBiome = BodyStatusSystem.transformBiomeTemperature(defaultTemperature);
+            builder.append(name).append("\t").append(defaultTemperature)
+                    .append("\t").append(downfall)
+                    .append('\t').append(defaultBiome)
+                    .append('\n');
+
+        }
+        try {
+            Files.write(Paths.get("./dump.txt"), builder.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

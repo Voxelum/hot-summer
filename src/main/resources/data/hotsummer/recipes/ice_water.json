@@ -5,11 +5,11 @@
       "item": "minecraft:snowball"
     },
     {
-      "item": "hotsummer:hot_water"
+      "item": "hotsummer:fresh_water"
     }
   ],
   "result": {
-    "item": "hotsummer:ice_water",
+    "item": "hotsummer:fresh_water",
     "count": 1
   }
 }

@@ -62,53 +62,7 @@ public class DrinkableHelper {
         return component;
     }
 
-    /**
-     * Replace {@link net.minecraft.item.GlassBottleItem#onItemRightClick}
-     */
-    public static boolean onGlassBottleItemUse(World world, PlayerEntity player, ItemStack itemStack) {
-        RayTraceResult raytraceresult = DrinkableItem.rayHelper(world, player, RayTraceContext.FluidMode.SOURCE_ONLY);
-        if (raytraceresult.getType() == RayTraceResult.Type.BLOCK) {
-            BlockPos blockpos = ((BlockRayTraceResult) raytraceresult).getPos();
-            if (!world.isBlockModifiable(player, blockpos)) {
-                return false;
-            }
-
-            if (world.getFluidState(blockpos).isTagged(FluidTags.WATER)) {
-                world.playSound(player, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-
-                ItemStack potion = new ItemStack(Items.POTION);
-                Drinkable drinkable = potion.getCapability(HotSummerMod.CAPABILITY_DRINKABLE).orElseThrow(Error::new);
-
-                Biome biome = world.getBiome(blockpos);
-                if (biome == Biomes.OCEAN
-                        || biome == Biomes.COLD_OCEAN
-                        || biome == Biomes.DEEP_WARM_OCEAN
-                        || biome == Biomes.DEEP_LUKEWARM_OCEAN
-                        || biome == Biomes.DEEP_COLD_OCEAN
-                        || biome == Biomes.DEEP_FROZEN_OCEAN
-                        || biome == Biomes.WARM_OCEAN
-                        || biome == Biomes.DEEP_OCEAN
-                        || biome == Biomes.FROZEN_OCEAN
-                        || biome == Biomes.LUKEWARM_OCEAN) {
-                    drinkable.salty = true;
-                }
-
-                if (blockpos.getY() > 50 || world.rand.nextInt(3) == 0) {
-                    drinkable.dirty = false;
-                } else {
-                    drinkable.dirty = true;
-                }
-
-                drinkable.hydrationRecovery = 0.2F;
-
-                turnBottleIntoItem(itemStack, player, PotionUtils.addPotionToItemStack(potion, Potions.WATER));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static ItemStack turnBottleIntoItem(ItemStack originalItem, PlayerEntity player, ItemStack water) {
+    public static ItemStack turnBottleIntoItem(ItemStack originalItem, PlayerEntity player, ItemStack water) {
         originalItem.shrink(1);
         player.addStat(Stats.ITEM_USED.get(Items.GLASS_BOTTLE));
         if (originalItem.isEmpty()) {

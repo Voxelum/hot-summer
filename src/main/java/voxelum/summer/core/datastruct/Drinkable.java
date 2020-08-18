@@ -15,7 +15,6 @@ public class Drinkable {
      * Is this liquid is dirty or not
      */
     public boolean dirty = true;
-
     /**
      * How much temperature should add to the drinker.
      * >0 for hot drink
@@ -23,7 +22,6 @@ public class Drinkable {
      * <0 for cold drink
      */
     public float deltaTemperature = 0;
-
     /**
      * Is water salty?
      */
